@@ -1051,6 +1051,12 @@ namespace VRTK
                 previousSecondaryGrabbingObject.GetComponent<VRTK_InteractGrab>().ForceRelease();
             }
             LoadPreviousState();
+
+            // ADDED CODE: transfers between active controllers upon ungrabbing with primary
+            if (previousSecondaryGrabbingObject != null)
+            {
+                previousSecondaryGrabbingObject.GetComponent<VRTK_InteractGrab>().AttemptGrab();
+            }
         }
 
         protected virtual void SecondaryControllerUngrab(GameObject previousGrabbingObject)

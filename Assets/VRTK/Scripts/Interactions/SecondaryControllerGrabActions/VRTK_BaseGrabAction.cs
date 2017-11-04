@@ -51,6 +51,12 @@ namespace VRTK.SecondaryControllerGrabActions
             initialised = false;
         }
 
+        // The IsInitialised method is used to determine if the secondary grab is being performed on the object.
+        public virtual bool IsInitialised()
+        {
+            return initialised;
+        }
+
         /// <summary>
         /// The IsActionable method is used to determine if the secondary grab action performs an action on grab.
         /// </summary>
