@@ -40,7 +40,6 @@ public class BlobController : MonoBehaviour {
     private float stretch = 0f;
 
     private bool hasBeenGrabbed = false;
-    private bool _hasBeenGrabbed = false;
 
     public float Stretch
     {
@@ -77,7 +76,7 @@ public class BlobController : MonoBehaviour {
             startingScale = transform.localScale;
         }
 
-        _hasBeenGrabbed = false;
+        hasBeenGrabbed = false;
     }
 
     private void OnDestroy()
@@ -133,15 +132,18 @@ public class BlobController : MonoBehaviour {
 
     private void Jump()
     {
-        if (transform.position.y < .25f + transform.localScale.y / 2f)
+        Rigidbody r = GetComponent<Rigidbody>();
+        if (transform.position.y < .15f + transform.localScale.y / 2f)
         {
+            transform.position = new Vector3 (transform.position.x,
+                                transform.localScale.y / 2f,
+                                transform.position.z);
             GetComponent<Rigidbody>().velocity = Vector3.up * Mathf.Abs(Physics.gravity.magnitude) * flightTime;
         }
     }
 
     private void Drop()
     {
-        Debug.Log(flightTime);
         Metronome.Instance.onBeat -= Drop;
         Metronome.Instance.onBeat += Jump;
 
@@ -152,7 +154,11 @@ public class BlobController : MonoBehaviour {
     private void Update()
     {
         hasBeenGrabbed = hasBeenGrabbed || interactable.IsGrabbed();
-        if (!interactable.IsGrabbed() && hasBeenGrabbed && !_hasBeenGrabbed)
+        if (interactable.IsGrabbed())
+        {
+            Metronome.Instance.onBeat -= Jump;
+        }
+        else if (!interactable.IsGrabbed() && hasBeenGrabbed)
         {
             if (followBeat)
             {
@@ -161,8 +167,7 @@ public class BlobController : MonoBehaviour {
                 timeToFall = Mathf.Round(timeToFall / beats) * beats;
                 flightTime = timeToFall;
                 transform.position = new Vector3(transform.position.x,
-                                    timeToFall * timeToFall * Mathf.Abs(Physics.gravity.magnitude) / 2f
-                                                + transform.localScale.y / 2f,
+                                    timeToFall * timeToFall * Mathf.Abs(Physics.gravity.magnitude) / 2f,
                                     transform.position.z);
 
                 GetComponent<Rigidbody>().isKinematic = true;
@@ -176,7 +181,7 @@ public class BlobController : MonoBehaviour {
                 GetComponent<Rigidbody>().useGravity = true;
             }
 
-            _hasBeenGrabbed = true;
+            hasBeenGrabbed = false;
         }
 
         if (!grabAction.IsInitialised())

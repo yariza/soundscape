@@ -29,6 +29,7 @@ GameObject:
   - component: {fileID: 114989428236381758}
   - component: {fileID: 114402506489824596}
   - component: {fileID: 114073695265518362}
+  - component: {fileID: 108762004657602050}
   m_Layer: 0
   m_Name: Blob
   m_TagString: Untagged
@@ -62,7 +63,7 @@ MeshRenderer:
   m_LightProbeUsage: 1
   m_ReflectionProbeUsage: 1
   m_Materials:
-  - {fileID: 2100000, guid: f5a180e78cba3b64d9cffa9c458a391d, type: 2}
+  - {fileID: 2100000, guid: 7c51c05f70fe24a7b8812e94d5e48ef9, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -103,6 +104,42 @@ Rigidbody:
   m_Interpolate: 0
   m_Constraints: 0
   m_CollisionDetection: 0
+--- !u!108 &108762004657602050
+Light:
+  m_ObjectHideFlags: 1
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 100100000}
+  m_GameObject: {fileID: 1414067961914020}
+  m_Enabled: 1
+  serializedVersion: 8
+  m_Type: 2
+  m_Color: {r: 1, g: 1, b: 1, a: 1}
+  m_Intensity: 0.42
+  m_Range: 2.61
+  m_SpotAngle: 30
+  m_CookieSize: 10
+  m_Shadows:
+    m_Type: 0
+    m_Resolution: -1
+    m_CustomResolution: -1
+    m_Strength: 1
+    m_Bias: 0.05
+    m_NormalBias: 0.4
+    m_NearPlane: 0.2
+  m_Cookie: {fileID: 0}
+  m_DrawHalo: 1
+  m_Flare: {fileID: 0}
+  m_RenderMode: 0
+  m_CullingMask:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_Lightmapping: 4
+  m_AreaSize: {x: 1, y: 1}
+  m_BounceIntensity: 1
+  m_ColorTemperature: 6570
+  m_UseColorTemperature: 0
+  m_ShadowRadius: 0
+  m_ShadowAngle: 0
 --- !u!114 &114073695265518362
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -126,6 +163,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 928fa566a45cbfb40b5b2ee9b3e3dd2d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  followBeat: 1
   stretchConstant: 0.9
   springDamp: 0.75
   prefabHolder: {fileID: 114536335768897788, guid: f30c06ccc09d6ba46bc3115ecb2cdbb0,

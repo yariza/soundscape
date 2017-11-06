@@ -54,7 +54,7 @@ public class Metronome : MonoBehaviour {
                 onBeat();
             }
 
-            yield return new WaitForSeconds(60f / (float)(BPM * divisions));
+            yield return new WaitForSeconds(BeatInSeconds);
         }
     }
 }
