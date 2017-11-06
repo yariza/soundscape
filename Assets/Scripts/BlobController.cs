@@ -6,6 +6,11 @@ using VRTK.GrabAttachMechanics;
 using VRTK.SecondaryControllerGrabActions;
 
 public class BlobController : MonoBehaviour {
+    
+    public bool followBeat = true;
+    private float flightTime = 0f;
+
+    [Space]
 
     [Tooltip("Strength by which the blobs hold together.")]
     public float stretchConstant = 1f;
@@ -13,6 +18,8 @@ public class BlobController : MonoBehaviour {
     [Tooltip("The damping value of the blob's springiness.")]
     [Range(0, 1)]
     public float springDamp = .05f;
+
+    [Space]
 
     public PrefabHolder prefabHolder;
     private VRTK_InteractableObject interactable;
@@ -73,10 +80,15 @@ public class BlobController : MonoBehaviour {
         _hasBeenGrabbed = false;
     }
 
+    private void OnDestroy()
+    {
+        Metronome.Instance.onBeat -= Drop;
+        Metronome.Instance.onBeat -= Jump;
+    }
+
     // Splits the blob into two blobs in each hand once a threshold for the scale is met
     private void Split()
     {
-
         // Deal with the controllers
         VRTK_InteractGrab primaryGrabber = interactable.GetGrabbingObject().GetComponent<VRTK_InteractGrab>();
         Vector3 primaryPos = primaryGrabber.controllerAttachPoint.transform.position;
@@ -119,13 +131,50 @@ public class BlobController : MonoBehaviour {
 
     }
 
+    private void Jump()
+    {
+        if (transform.position.y < .25f + transform.localScale.y / 2f)
+        {
+            GetComponent<Rigidbody>().velocity = Vector3.up * Mathf.Abs(Physics.gravity.magnitude) * flightTime;
+        }
+    }
+
+    private void Drop()
+    {
+        Debug.Log(flightTime);
+        Metronome.Instance.onBeat -= Drop;
+        Metronome.Instance.onBeat += Jump;
+
+        GetComponent<Rigidbody>().isKinematic = false;
+        GetComponent<Rigidbody>().useGravity = true;
+    }
+
     private void Update()
     {
         hasBeenGrabbed = hasBeenGrabbed || interactable.IsGrabbed();
         if (!interactable.IsGrabbed() && hasBeenGrabbed && !_hasBeenGrabbed)
         {
-            GetComponent<Rigidbody>().isKinematic = false;
-            GetComponent<Rigidbody>().useGravity = true;
+            if (followBeat)
+            {
+                float timeToFall = Mathf.Sqrt(Mathf.Abs(2 * transform.position.y / Physics.gravity.magnitude));
+                float beats = Metronome.Instance.BeatInSeconds;
+                timeToFall = Mathf.Round(timeToFall / beats) * beats;
+                flightTime = timeToFall;
+                transform.position = new Vector3(transform.position.x,
+                                    timeToFall * timeToFall * Mathf.Abs(Physics.gravity.magnitude) / 2f
+                                                + transform.localScale.y / 2f,
+                                    transform.position.z);
+
+                GetComponent<Rigidbody>().isKinematic = true;
+                GetComponent<Rigidbody>().useGravity = false;
+
+                Metronome.Instance.onBeat += Drop;
+            }
+            else
+            {
+                GetComponent<Rigidbody>().isKinematic = false;
+                GetComponent<Rigidbody>().useGravity = true;
+            }
 
             _hasBeenGrabbed = true;
         }
