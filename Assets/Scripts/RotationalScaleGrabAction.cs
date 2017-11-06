@@ -81,6 +81,7 @@ namespace VRTK.SecondaryControllerGrabActions
             base.ProcessFixedUpdate();
             if (initialised)
             {
+                StretchObjectX();
                 ScaleObjectX();
                 RotateObject();
 
@@ -91,7 +92,7 @@ namespace VRTK.SecondaryControllerGrabActions
             }
         }
 
-        public Transform GrabPoint()
+        public Transform PrimaryGrabPoint()
         {
             if (primaryGrabbingObject)
             {
@@ -100,9 +101,32 @@ namespace VRTK.SecondaryControllerGrabActions
             return null;
         }
 
-        public Transform InitialGrabPoint()
+        public Transform PrimaryInitialGrabPoint()
         {
             return primaryInitialGrabPoint;
+        }
+
+        public Transform SecondaryGrabPoint()
+        {
+            if (secondaryGrabbingObject)
+            {
+                return secondaryGrabbingObject.controllerAttachPoint.transform;
+            }
+            return null;
+        }
+
+        public Transform SecondaryInitialGrabPoint()
+        {
+            return secondaryInitialGrabPoint;
+        }
+
+        public bool GrabbedByPrimary()
+        {
+            if (grabbedObject)
+            {
+                return grabbedObject.GetSecondaryGrabbingObject();
+            }
+            return false;
         }
 
         public bool ScaleByGrabbedPoint(Vector3 scale)
@@ -133,6 +157,13 @@ namespace VRTK.SecondaryControllerGrabActions
 
             var newScale = new Vector3(currentSeparation - initialSeparation, 0f, 0f) + initialScale;
             ApplyScale(newScale);
+        }
+
+        protected void StretchObjectX()
+        {
+            float currentSeparation = (primaryGrabbingObject.transform.position - secondaryGrabbingObject.transform.position).magnitude;
+
+            GetComponent<BlobController>().ApplyStretch(currentSeparation - initialSeparation);
         }
 
         protected virtual void RotateObject()

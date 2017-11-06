@@ -637,12 +637,19 @@ namespace VRTK
         /// <summary>
         /// The ForceStopInteracting method forces the object to no longer be interacted with and will cause a controller to drop the object and stop touching it. This is useful if the controller is required to auto interact with another object.
         /// </summary>
-        public virtual void ForceStopInteracting()
+        public virtual void ForceStopInteracting(bool immediate = false)
         {
             if (gameObject.activeInHierarchy)
             {
                 forceDisabled = false;
-                StartCoroutine(ForceStopInteractingAtEndOfFrame());
+                if (immediate)
+                {
+                    ForceStopAllInteractions();
+                }
+                else
+                {
+                    StartCoroutine(ForceStopInteractingAtEndOfFrame());
+                }
             }
 
             if (!gameObject.activeInHierarchy && forceDisabled)

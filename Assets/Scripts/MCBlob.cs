@@ -41,9 +41,9 @@
 		/*Amount of cubes in X/Y/Z directions, Dimension will always be from -.5f to .5f in XYZ
 	  remember to call Regen() if changing!
     */
-		int _dimX=30;
-		int _dimY=30;
-		int _dimZ=30;
+		int _dimX=20;
+		int _dimY=20;
+		int _dimZ=20;
 
 		public int dimX {
 			get {return _dimX; }
@@ -188,18 +188,37 @@
 				set{ index[2]=value; }
 			}
 
+            public float SphereDistance(float[] pb)
+            {
+                return (1.0f / Mathf.Sqrt(((pb[0] - this.x) * (pb[0] - this.x)) + ((pb[1] - this.y) * (pb[1] - this.y)) + ((pb[2] - this.z) * (pb[2] - this.z)))) * pb[3];
+            }
 
+            public float StretchDistance(float[] pb)
+            {
+            float scale = 15f * Mathf.Min(.2f, Mathf.Abs(pb[0]));
+            float newX = (Mathf.Abs(this.x) - Mathf.Abs(pb[0]) < 0 &&
+                          Mathf.Sign(this.x) * Mathf.Sign(pb[0]) > 0) ?
+                (this.x - pb[0]) /
+                (1 + scale * Mathf.Abs(this.x - pb[0])) + pb[0]
+                :
+                this.x;
+                Vector3 center = Vector3.zero;
+                return 1.0f / (Mathf.Sqrt(
+                    ((pb[0] - newX) * (pb[0] - newX)) +
+                    ((pb[1] - this.y) * (pb[1] - this.y)) +
+                    ((pb[2] - this.z) * (pb[2] - this.z))));
+            }
 
-			/*Calculate the power of a point only if it hasn't been calculated already for this frame*/
-			public float i()
+        /*Calculate the power of a point only if it hasn't been calculated already for this frame*/
+        public float i()
 			{
 				float pwr;
 				if(cntr<mcblob.pctr) {
 					cntr=mcblob.pctr;
 					pwr=0f;
 					for(int jc=0;jc<this.mcblob.blobs.Length;jc++) {
-						float[] pb=this.mcblob.blobs[jc];					
-						pwr+=(1.0f/Mathf.Sqrt(((pb[0]-this.x)*(pb[0]-this.x))+((pb[1]-this.y)*(pb[1]-this.y))+((pb[2]-this.z)*(pb[2]-this.z))))*pb[3];
+						float[] pb=this.mcblob.blobs[jc];
+                        pwr += StretchDistance(pb);
 					}
 					this._i=pwr;
 				}
@@ -282,7 +301,7 @@
 				e.v3=v;
 				e.vi=vertP;
 				newNormal[vertP]=calcNormal(v);
-				newVertex[vertP++]=v;		
+				newVertex[vertP++]=v;
 				e.cntr=pctr;		
 
 			}  
@@ -431,7 +450,7 @@
 			for(i=0;i<vertP;i++) {fv[i]=newVertex[i];fn[i]=newNormal[i];		                      
 				fuv[i]=tada2[tadac2++];
 				Vector3 fuvt=transform.TransformPoint(fn[i]).normalized;							  
-				fuv[i].x=(fuvt.x+1f)*.5f;fuv[i].y=(fuvt.y+1f)*.5f;}							  
+				fuv[i].x=((fuvt.x+1f)*.5f);fuv[i].y=(fuvt.y+1f)*.5f;}							  
 			//							  fuv[i].x=fn[i].x;fuv[i].y=fn[i].y;}
 
 			for(i=vertP;i<fv.Length;i++) {fv[i][0]=0;fn[i][0]=0;fuv[i][0]=0;
@@ -477,33 +496,18 @@
 
 		//Unity and Sample specific
 		void Update () {
-			blobs [0] [0] = .3f * Mathf.Sin (Time.time * .5f);
-			blobs [1] [0] = -.3f * Mathf.Sin (Time.time * .5f);
-			/*blobs[0][0]=.12f+.12f*(float)Mathf.Sin((float)Time.time*.50f);
-			blobs[0][2]=.06f+.23f*(float)Mathf.Cos((float)Time.time*.2f);
-			blobs[1][0]=.12f+.12f*(float)Mathf.Sin((float)Time.time*.2f);
-			blobs[1][2]=-.23f+.10f*(float)Mathf.Cos((float)Time.time*1f);
-			blobs[2][1]=-.03f+.24f*(float)Mathf.Sin((float)Time.time*.35f);
-			blobs[3][1]=.126f+.10f*(float)Mathf.Cos((float)Time.time*.1f);
-			blobs[4][0]=.206f+.1f*(float)Mathf.Cos((float)Time.time*.5f);
-			blobs[4][1]=.056f+.2f*(float)Mathf.Sin((float)Time.time*.3f);
-			blobs[4][2]=.25f+.08f*(float)Mathf.Cos((float)Time.time*.2f);
+            blobs[0][0] = GetComponent<BlobController>().Stretch;
+		    blobs[1][0] = -GetComponent<BlobController>().Stretch;
 
-			transform.Rotate(Time.deltaTime*10f,0,Time.deltaTime*.6f);*/
-
-			doFrame();	
-
-
-		}
+            doFrame();
+    }
 
 		//Unity and Sample Specific
 		void Start () {
 			lt=0f;
 			blobs=new float[2][];
-			blobs[0]=new float[]{0f, 0f, 0f, .2f};
-			blobs[1]=new float[]{0f, 0f, 0f, .2f};
-
-			isoLevel=1.95f;
+			blobs[0]=new float[]{0f, 0f, 0f, 1f};
+			blobs[1]=new float[]{0f, 0f, 0f, 1f};
 
 			Regen();
 		}
@@ -513,8 +517,10 @@
 		/*Unity Specific starting of engine*/
 		void startEngine()
 		{
-			((MeshFilter) GetComponent("MeshFilter")).mesh=new Mesh();
-		}
+            Mesh m = new Mesh();
+            m.MarkDynamic();
+			((MeshFilter) GetComponent("MeshFilter")).mesh=m;
+        }
 
 
 		/*Generate the Cube Lattice
@@ -571,7 +577,7 @@
 			for(jx=0.0f;jx<=dimX;jx++){
 				for(jy=0.0f;jy<=dimY;jy++) {
 					for(jz=0.0f;jz<=dimZ;jz++){
-						_points[i]=new mcPoint((jx/dimX)-.5f,(jy/dimY)-.5f,(jz/dimZ)-.5f,(int)jx,(int)jy,(int)jz,this);
+						_points[i]=new mcPoint(((jx/dimX)-.5f),(jy/dimY)-.5f,(jz/dimZ)-.5f,(int)jx,(int)jy,(int)jz,this);
 
 						i++;
 					}
