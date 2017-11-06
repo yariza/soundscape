@@ -114,8 +114,8 @@ Light:
   serializedVersion: 8
   m_Type: 2
   m_Color: {r: 1, g: 1, b: 1, a: 1}
-  m_Intensity: 0.42
-  m_Range: 2.61
+  m_Intensity: 0.35
+  m_Range: 4.95
   m_SpotAngle: 30
   m_CookieSize: 10
   m_Shadows:
@@ -127,7 +127,7 @@ Light:
     m_NormalBias: 0.4
     m_NearPlane: 0.2
   m_Cookie: {fileID: 0}
-  m_DrawHalo: 1
+  m_DrawHalo: 0
   m_Flare: {fileID: 0}
   m_RenderMode: 0
   m_CullingMask:
@@ -163,6 +163,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 928fa566a45cbfb40b5b2ee9b3e3dd2d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  ppProfile: {fileID: 11400000, guid: 15c4ad86b91cbff4dae25260309708a8, type: 2}
   followBeat: 1
   stretchConstant: 0.9
   springDamp: 0.75
@@ -209,7 +210,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   disableWhenIdle: 1
-  touchHighlightColor: {r: 1, g: 0, b: 1, a: 0}
+  touchHighlightColor: {r: 0, g: 0, b: 0, a: 0}
   allowedTouchControllers: 0
   ignoredColliders: []
   isGrabbable: 1

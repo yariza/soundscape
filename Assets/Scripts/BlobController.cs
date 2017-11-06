@@ -1,12 +1,19 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.PostProcessing;
 using VRTK;
 using VRTK.GrabAttachMechanics;
 using VRTK.SecondaryControllerGrabActions;
 
 public class BlobController : MonoBehaviour {
-    
+
+    private static bool resetSettings = false;
+    private static bool initiated = false;
+    public PostProcessingProfile ppProfile;
+
+    [Space]
+
     public bool followBeat = true;
     private float flightTime = 0f;
 
@@ -55,6 +62,22 @@ public class BlobController : MonoBehaviour {
     public void ApplyStretch(float stretchValue)
     {
         stretch = stretchValue * stretchConstant;
+    }
+
+    private void Awake()
+    {
+        if (!resetSettings)
+        {
+            resetSettings = true;
+
+            BloomModel.Settings bloomSettings = ppProfile.bloom.settings;
+            bloomSettings.bloom.intensity = 0f;
+            ppProfile.bloom.settings = bloomSettings;
+
+            ColorGradingModel.Settings cgSettings = ppProfile.colorGrading.settings;
+            cgSettings.basic.saturation = 0f;
+            ppProfile.colorGrading.settings = cgSettings;
+        }
     }
 
     private void Start()
@@ -130,6 +153,15 @@ public class BlobController : MonoBehaviour {
 
     }
 
+    private void Initiate()
+    {
+        if (!initiated)
+        {
+            initiated = true;
+            StartCoroutine(FadeIn());
+        }
+    }
+
     private void Jump()
     {
         Rigidbody r = GetComponent<Rigidbody>();
@@ -153,6 +185,11 @@ public class BlobController : MonoBehaviour {
 
     private void Update()
     {
+        if (!initiated && interactable.IsTouched())
+        {
+            Initiate();
+        }
+
         hasBeenGrabbed = hasBeenGrabbed || interactable.IsGrabbed();
         if (interactable.IsGrabbed())
         {
@@ -224,6 +261,23 @@ public class BlobController : MonoBehaviour {
                                    startingScale.y * scaleMultiplier,
                                    startingScale.z * scaleMultiplier);
 
+    }
+
+    IEnumerator FadeIn()
+    {
+        BloomModel.Settings bloomSettings = ppProfile.bloom.settings;
+        ColorGradingModel.Settings cgSettings = ppProfile.colorGrading.settings;
+
+        for (float f = 0f; f <= 2.0f; f += .01f)
+        {
+            bloomSettings.bloom.intensity = Mathf.Lerp(0f, 25f, f / 2f);
+            ppProfile.bloom.settings = bloomSettings;
+
+            cgSettings.basic.saturation = Mathf.Lerp(0f, 2f, f / 2f);
+            ppProfile.colorGrading.settings = cgSettings;
+
+            yield return new WaitForSeconds(.01f);
+        }
     }
 
     IEnumerator GrabAtEndOfFrame(VRTK_InteractGrab primary, VRTK_InteractGrab secondary)
