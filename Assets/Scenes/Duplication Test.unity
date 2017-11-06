@@ -745,7 +745,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   stretchConstant: 1
   springDamp: 0.75
-  holdStretch: 0
+  prefabHolder: {fileID: 0}
 --- !u!114 &85712410
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1197,7 +1197,7 @@ Prefab:
       objectReference: {fileID: 0}
     - target: {fileID: 4835616041111642, guid: a77c1a9b4f6f46e409703ffc436964c8, type: 2}
       propertyPath: m_LocalPosition.y
-      value: 1.674
+      value: 1.32
       objectReference: {fileID: 0}
     - target: {fileID: 4835616041111642, guid: a77c1a9b4f6f46e409703ffc436964c8, type: 2}
       propertyPath: m_LocalPosition.z
@@ -1222,38 +1222,6 @@ Prefab:
     - target: {fileID: 4835616041111642, guid: a77c1a9b4f6f46e409703ffc436964c8, type: 2}
       propertyPath: m_RootOrder
       value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 114073695265518362, guid: a77c1a9b4f6f46e409703ffc436964c8,
-        type: 2}
-      propertyPath: m_Enabled
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 4835616041111642, guid: a77c1a9b4f6f46e409703ffc436964c8, type: 2}
-      propertyPath: m_LocalScale.x
-      value: 0.6022493
-      objectReference: {fileID: 0}
-    - target: {fileID: 4835616041111642, guid: a77c1a9b4f6f46e409703ffc436964c8, type: 2}
-      propertyPath: m_LocalScale.y
-      value: 0.6022495
-      objectReference: {fileID: 0}
-    - target: {fileID: 4835616041111642, guid: a77c1a9b4f6f46e409703ffc436964c8, type: 2}
-      propertyPath: m_LocalScale.z
-      value: 0.6022495
-      objectReference: {fileID: 0}
-    - target: {fileID: 54748450127680652, guid: a77c1a9b4f6f46e409703ffc436964c8,
-        type: 2}
-      propertyPath: m_IsKinematic
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 54748450127680652, guid: a77c1a9b4f6f46e409703ffc436964c8,
-        type: 2}
-      propertyPath: m_UseGravity
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 135361315037594260, guid: a77c1a9b4f6f46e409703ffc436964c8,
-        type: 2}
-      propertyPath: m_Radius
-      value: 0.195
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_ParentPrefab: {fileID: 100100000, guid: a77c1a9b4f6f46e409703ffc436964c8, type: 2}
@@ -9270,7 +9238,7 @@ Prefab:
     - target: {fileID: 224000012623161658, guid: d46cf6b1ad9d84a48ae7548a2a6b41b3,
         type: 2}
       propertyPath: m_AnchoredPosition.x
-      value: 837
+      value: 579
       objectReference: {fileID: 0}
     - target: {fileID: 224000012623161658, guid: d46cf6b1ad9d84a48ae7548a2a6b41b3,
         type: 2}

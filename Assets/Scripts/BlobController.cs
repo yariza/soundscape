@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 using VRTK;
+using VRTK.GrabAttachMechanics;
 using VRTK.SecondaryControllerGrabActions;
 
 public class BlobController : MonoBehaviour {
@@ -13,7 +14,7 @@ public class BlobController : MonoBehaviour {
     [Range(0, 1)]
     public float springDamp = .05f;
 
-    private MCBlob blob;
+    public PrefabHolder prefabHolder;
     private VRTK_InteractableObject interactable;
 
     private RotationalScaleGrabAction grabAction;
@@ -30,7 +31,9 @@ public class BlobController : MonoBehaviour {
     private float stretchAcceleration = 0f;
     
     private float stretch = 0f;
-    public bool holdStretch = false;
+
+    private bool hasBeenGrabbed = false;
+    private bool _hasBeenGrabbed = false;
 
     public float Stretch
     {
@@ -55,11 +58,7 @@ public class BlobController : MonoBehaviour {
         {
             Debug.Log("[BlobController] No RotationScaleGrabAction script on " + name);
         }
-        blob = GetComponent<MCBlob>();
-        if (blob == null)
-        {
-            Debug.Log("[BlobController] No MCBlob script on " + name);
-        }
+
         interactable = GetComponent<VRTK_InteractableObject>();
         if (interactable == null)
         {
@@ -70,6 +69,8 @@ public class BlobController : MonoBehaviour {
         {
             startingScale = transform.localScale;
         }
+
+        _hasBeenGrabbed = false;
     }
 
     // Splits the blob into two blobs in each hand once a threshold for the scale is met
@@ -78,36 +79,34 @@ public class BlobController : MonoBehaviour {
 
         // Deal with the controllers
         VRTK_InteractGrab primaryGrabber = interactable.GetGrabbingObject().GetComponent<VRTK_InteractGrab>();
+        Vector3 primaryPos = primaryGrabber.controllerAttachPoint.transform.position;
         VRTK_InteractGrab secondaryGrabber = interactable.GetSecondaryGrabbingObject().GetComponent<VRTK_InteractGrab>();
+        Vector3 secondaryPos = secondaryGrabber.controllerAttachPoint.transform.position;
+
         interactable.ForceStopInteracting(true);
         interactable.ForceStopSecondaryGrabInteraction();
 
         StartCoroutine(GrabAtEndOfFrame(primaryGrabber, secondaryGrabber));
 
         // Instantiate the blobs
-        Vector3 leftBlob = new Vector3(blob.blobs[0][0], blob.blobs[0][1], blob.blobs[0][2]);
-        Vector3 rightBlob = new Vector3(blob.blobs[1][0], blob.blobs[1][1], blob.blobs[1][2]);
-
-        GameObject leftGO = Instantiate(this.gameObject);
-        GameObject rightGO = Instantiate(this.gameObject);
+        GameObject leftGO = Instantiate(prefabHolder.prefab);
+        GameObject rightGO = Instantiate(prefabHolder.prefab);
         leftGO.GetComponent<Rigidbody>().isKinematic = false;
         rightGO.GetComponent<Rigidbody>().isKinematic = false;
 
-        leftGO.transform.position = transform.position + transform.rotation * leftBlob;
+        //leftGO.transform.position = transform.position + transform.rotation * leftBlob;
+        leftGO.transform.position = primaryPos * .95f + secondaryPos * .05f;
         leftGO.transform.rotation = transform.rotation;
         leftGO.transform.localScale *= .9f;
-        rightGO.transform.position = transform.position + transform.rotation * rightBlob;
+        //rightGO.transform.position = transform.position + transform.rotation * rightBlob;
+        rightGO.transform.position = secondaryPos * .95f + primaryPos * .05f;
         rightGO.transform.rotation = transform.rotation;
         rightGO.transform.localScale *= .9f;
-
-        Debug.Log(leftGO.GetComponent<BlobController>().StartingScale);
 
         leftGO.GetComponent<BlobController>().stretch = .14f;
         leftGO.GetComponent<BlobController>().StartingScale = startingScale * .9f;
         rightGO.GetComponent<BlobController>().stretch = .14f;
         rightGO.GetComponent<BlobController>().StartingScale = startingScale * .9f;
-
-        Debug.Log(leftGO.GetComponent<BlobController>().StartingScale);
 
         // Disable current object
         GetComponent<MeshRenderer>().enabled = false;
@@ -122,15 +121,24 @@ public class BlobController : MonoBehaviour {
 
     private void Update()
     {
-        float scaleDisplacement = startingScale.x - transform.localScale.x;
-        float stretchDisplacement = stretch;
-        scaleVelocity = Mathf.SmoothDamp(scaleVelocity, scaleDisplacement * springDamp, ref scaleAcceleration, .05f);
-        stretchVelocity = Mathf.SmoothDamp(stretchVelocity, stretchDisplacement * springDamp, ref stretchAcceleration, .05f);
-        Vector3 springScale = transform.localScale + Vector3.right * scaleVelocity;
-        float springStretch = stretch - stretchVelocity;
-
-        if (!grabAction.IsInitialised() && !holdStretch)
+        hasBeenGrabbed = hasBeenGrabbed || interactable.IsGrabbed();
+        if (!interactable.IsGrabbed() && hasBeenGrabbed && !_hasBeenGrabbed)
         {
+            GetComponent<Rigidbody>().isKinematic = false;
+            GetComponent<Rigidbody>().useGravity = true;
+
+            _hasBeenGrabbed = true;
+        }
+
+        if (!grabAction.IsInitialised())
+        {
+            float scaleDisplacement = startingScale.x - transform.localScale.x;
+            float stretchDisplacement = stretch;
+            scaleVelocity = Mathf.SmoothDamp(scaleVelocity, scaleDisplacement * springDamp, ref scaleAcceleration, .05f);
+            stretchVelocity = Mathf.SmoothDamp(stretchVelocity, stretchDisplacement * springDamp, ref stretchAcceleration, .05f);
+            Vector3 springScale = transform.localScale + Vector3.right * scaleVelocity;
+            float springStretch = stretch - stretchVelocity;
+
             transform.localScale = springScale;
             stretch = springStretch;
         }
@@ -152,10 +160,15 @@ public class BlobController : MonoBehaviour {
             Split();
         }
 
-        /*if (transform.localScale.x <= .01f)
+        if (transform.localScale.x <= .01f)
         {
             transform.localScale = new Vector3(.01f, transform.localScale.y, transform.localScale.z);
-        }*/
+        }
+
+        float scaleMultiplier = .5f + .5f * startingScale.x / transform.localScale.x;
+        transform.localScale = new Vector3(transform.localScale.x,
+                                   startingScale.y * scaleMultiplier,
+                                   startingScale.z * scaleMultiplier);
 
     }
 

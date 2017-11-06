@@ -87,7 +87,7 @@ namespace VRTK.SecondaryControllerGrabActions
 
                 if (grabbedObject.grabAttachMechanicScript.precisionGrab)
                 {
-                    transform.Translate(primaryGrabbingObject.controllerAttachPoint.transform.position - primaryInitialGrabPoint.position - translationOffset, Space.World);
+                    transform.position = (primaryGrabbingObject.controllerAttachPoint.transform.position + secondaryGrabbingObject.controllerAttachPoint.position) / 2f;
                 }
             }
         }
